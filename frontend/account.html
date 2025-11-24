@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CineMatch – Mon compte</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="account.css" />
+</head>
+<body>
+  <div class="app-container account-page">
+    <header class="hero account-hero">
+      <div class="hero-top-row">
+        <div class="hero-left">
+          <a href="index.html" class="back-link">
+            ← Retour aux recommandations
+          </a>
+          <img src="assets/images/logo.png" alt="CineMatch logo" class="logo account-logo">
+        </div>
+        <div class="hero-right">
+          <div class="account-summary-pill">
+            <div class="pill-avatar"></div>
+            <div class="pill-text">
+              <span class="pill-label">Connecté en tant que</span>
+              <span class="pill-name">Ybelis</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="account-main">
+      <section class="profile-dashboard">
+        <div class="profile-stats-row">
+          <div class="stat-card">
+            <p class="stat-label">Films vus</p>
+            <p class="stat-value">124</p>
+            <p class="stat-sub">dont 18 ce mois-ci</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">Watchlist</p>
+            <p class="stat-value">36</p>
+            <p class="stat-sub">en attente</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">Note moyenne</p>
+            <p class="stat-value">4.2</p>
+            <p class="stat-sub">sur 5</p>
+          </div>
+        </div>
+
+        <div class="profile-grid">
+          <div class="profile-section">
+            <h3>Activité récente</h3>
+            <ul class="profile-list">
+              <li>
+                <span class="dot dot-seen"></span>
+                <div>
+                  <p class="item-title">Interstellar</p>
+                  <p class="item-meta">Vu hier • Noté <strong>Adoré</strong></p>
+                </div>
+              </li>
+              <li>
+                <span class="dot dot-seen"></span>
+                <div>
+                  <p class="item-title">Whiplash</p>
+                  <p class="item-meta">Vu il y a 3 jours • Noté <strong>J'ai aimé</strong></p>
+                </div>
+              </li>
+              <li>
+                <span class="dot dot-unseen"></span>
+                <div>
+                  <p class="item-title">Blade Runner 2049</p>
+                  <p class="item-meta">Ajouté à la watchlist</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <div class="profile-section">
+            <h3>Genres les plus vus</h3>
+            <div class="genre-chips">
+              <span class="chip chip-main">Science-Fiction</span>
+              <span class="chip">Drame</span>
+              <span class="chip">Thriller</span>
+              <span class="chip">Action</span>
+              <span class="chip">Animation</span>
+            </div>
+
+            <div class="mini-bar-chart">
+              <div class="bar-row">
+                <span>Sci-Fi</span>
+                <div class="bar-track"><div class="bar-fill" style="width: 90%"></div></div>
+              </div>
+              <div class="bar-row">
+                <span>Drame</span>
+                <div class="bar-track"><div class="bar-fill" style="width: 70%"></div></div>
+              </div>
+              <div class="bar-row">
+                <span>Thriller</span>
+                <div class="bar-track"><div class="bar-fill" style="width: 55%"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-section">
+          <h3>Watchlist (extrait)</h3>
+          <ul class="profile-list profile-watchlist">
+            <li>
+              <div class="poster-pill"></div>
+              <div>
+                <p class="item-title">Dune: Part Two</p>
+                <p class="item-meta">Sortie récente • Sci-Fi</p>
+              </div>
+              <span class="tag-pill">Priorité</span>
+            </li>
+            <li>
+              <div class="poster-pill"></div>
+              <div>
+                <p class="item-title">The Social Network</p>
+                <p class="item-meta">Drame • Recommandé par BERT</p>
+              </div>
+              <span class="tag-pill tag-soft">À voir</span>
+            </li>
+          </ul>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,131 +1,233 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-import joblib
+from pathlib import Path
+from typing import List, Optional
 import pandas as pd
-from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.neighbors import NearestNeighbors
+import numpy as np
+from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
-app = FastAPI()
+from data_loader import (
+    build_movielens_to_tmdb_map,
+    load_movielens_100k,
+    load_tmdb_movies,
+)
+from models_content import (
+    ContentModels,
+    build_content_models,
+    explain_pair,
+    find_movie_index,
+    hybrid_scores,
+    recommend_bert,
+    recommend_tfidf,
+)
+from models_cf import CFModels, build_cf_models, recommend_similar_items_cf
+
+# ------------ chemins robustes ------------
+BASE_DIR = Path(__file__).resolve().parent.parent
+TMDB_PATH = BASE_DIR / "eda" / "tmdb_movies.csv"
+MOVIELENS_DIR = BASE_DIR / "eda" / "movielens"
+
+K_DEFAULT = 10
+# -----------------------------------------
+
+
+class MovieOut(BaseModel):
+    title: str
+    overview: Optional[str] = None
+    genres: Optional[str] = None
+    director: Optional[str] = None
+    cast: Optional[str] = None
+    tagline: Optional[str] = None
+    poster_path: Optional[str] = None
+    score_tfidf: Optional[float] = None
+    score_bert: Optional[float] = None
+    score_cf: Optional[float] = None
+    score_hybrid: Optional[float] = None
+
+
+class ExplanationOut(BaseModel):
+    source_title: str
+    candidate_title: str
+    similarity_tfidf: float
+    similarity_bert: float
+    shared_genres: List[str]
+    shared_cast: List[str]
+    same_director: bool
+    director: Optional[str]
+
+
+app = FastAPI(title="CineMatch v2")
 
 app.add_middleware(
-    CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"]
+    CORSMiddleware,
+    allow_origins=["*"],  # à restreindre éventuellement
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-df = pd.read_csv("../data/data.csv")
 
-# même filtrage que dans ton notebook
-df = df[df["original_language"] == "en"]
-df = df[df["overview"].notna()]
-df = df.sort_values("popularity", ascending=False).head(30000).reset_index(drop=True)
+# --------- Chargement global des modèles ---------
+TMDB_DF = load_tmdb_movies(TMDB_PATH)
+CONTENT_MODELS: ContentModels = build_content_models(TMDB_DF)
 
-
-def clean_text(col):
-    if isinstance(col, str):
-        return col.replace("[", "").replace("]", "").replace("'", "")
-    return ""
+ML_RATINGS, ML_ITEMS = load_movielens_100k(MOVIELENS_DIR)
+ML_TO_TMDB = build_movielens_to_tmdb_map(ML_ITEMS, TMDB_DF)
+CF_MODELS: CFModels = build_cf_models(ML_RATINGS, ML_ITEMS, ML_TO_TMDB)
+# -------------------------------------------------
 
 
-df["genres_clean"] = df["genres"].apply(clean_text)
-df["cast_clean"] = df["cast"].apply(clean_text)
-df["director_clean"] = df["director"].fillna("")
-df["tagline_clean"] = df["tagline"].fillna("")
-df["overview_clean"] = df["overview"].fillna("")
+def movie_to_out(idx: int) -> MovieOut:
+  row = TMDB_DF.iloc[idx]
 
-df["text"] = (
-    df["overview_clean"]
-    + " "
-    + df["genres_clean"]
-    + " "
-    + df["cast_clean"]
-    + " "
-    + df["director_clean"]
-    + " "
-    + df["tagline_clean"]
-)
+  def clean(val):
+      if val is None:
+          return None
+      try:
+          import math
+          if isinstance(val, float) and math.isnan(val):
+              return None
+      except Exception:
+          pass
+      return val
 
-tfidf = TfidfVectorizer(stop_words="english", max_features=50000)
-tfidf_matrix = tfidf.fit_transform(df["text"])
+  # Fallback propre sur les colonnes
+  genres = row.get("genres_clean")
+  if not isinstance(genres, str) or not genres.strip():
+      genres = row.get("genres")
 
-knn = NearestNeighbors(n_neighbors=10, metric="cosine")
-knn.fit(tfidf_matrix)
+  cast = row.get("cast_clean")
+  if not isinstance(cast, str) or not cast.strip():
+      cast = row.get("cast")
 
+  director = row.get("director_clean")
+  if not isinstance(director, str) or not director.strip():
+      director = row.get("director")
 
-@app.get("/recommend")
-def recommend(title: str, n: int = 10):
-    title_low = title.lower()
+  tagline = row.get("tagline_clean")
+  if not isinstance(tagline, str) or not tagline.strip():
+      tagline = row.get("tagline")
 
-    if title_low not in df["title"].str.lower().values:
-        return {"error": f"Movie '{title}' not found."}
+  return MovieOut(
+      title=str(row["title"]),
+      overview=clean(row.get("overview")),
+      genres=clean(genres),
+      director=clean(director),
+      cast=clean(cast),
+      tagline=clean(tagline),
+      poster_path=clean(row.get("poster_path")),
+  )
 
-    idx = df[df["title"].str.lower() == title_low].index[0]
-    vector = tfidf_matrix[idx]
-
-    distances, indices = knn.kneighbors(vector, n_neighbors=n + 1)
-    rec_df = df.iloc[indices[0][1:]][
-        ["title", "overview", "genres_clean", "poster_path"]
-    ]
-
-    # IMPORTANT : enlever les NaN avant de convertir en dict
-    rec_df = rec_df.where(pd.notnull(rec_df), None)
-
-    return rec_df.to_dict(orient="records")
-
-
-@app.get("/explain")
-def explain(source: str, candidate: str):
-    source_low = source.lower()
-    cand_low = candidate.lower()
-
-    if source_low not in df["title"].str.lower().values:
-        return {"error": f"Source movie '{source}' not found."}
-    if cand_low not in df["title"].str.lower().values:
-        return {"error": f"Candidate movie '{candidate}' not found."}
-
-    idx_s = df[df["title"].str.lower() == source_low].index[0]
-    idx_c = df[df["title"].str.lower() == cand_low].index[0]
-
-    # Similarité TF-IDF entre les deux films
-    sim = float(cosine_similarity(tfidf_matrix[idx_s], tfidf_matrix[idx_c])[0, 0])
-
-    # Genres en commun
-    def to_set(val: str):
-        if not isinstance(val, str):
-            return set()
-        return {g.strip() for g in val.split(",") if g.strip()}
-
-    genres_s = to_set(df.loc[idx_s, "genres_clean"])
-    genres_c = to_set(df.loc[idx_c, "genres_clean"])
-    shared_genres = sorted(list(genres_s & genres_c))
-
-    # Réalisateur
-    dir_s = (df.loc[idx_s, "director_clean"] or "").strip()
-    dir_c = (df.loc[idx_c, "director_clean"] or "").strip()
-    same_director = bool(dir_s and dir_c and dir_s == dir_c)
-
-    # Cast commun (on coupe aux 5 premiers pour éviter le bruit)
-    cast_s = to_set(df.loc[idx_s, "cast_clean"])
-    cast_c = to_set(df.loc[idx_c, "cast_clean"])
-    shared_cast = sorted(list(cast_s & cast_c))[:5]
-
-    return {
-        "source": df.loc[idx_s, "title"],
-        "candidate": df.loc[idx_c, "title"],
-        "similarity": sim,
-        "shared_genres": shared_genres,
-        "same_director": same_director,
-        "director": dir_c if same_director else dir_c,
-        "shared_cast": shared_cast,
-    }
-
-
-@app.get("/suggest")
-def suggest(query: str, limit: int = 10):
+@app.get("/suggest", response_model=List[str])
+def suggest(
+    query: str = Query(..., min_length=1),
+    limit: int = Query(10, ge=1, le=50),
+):
     q = query.strip().lower()
     if not q:
         return []
+    mask = TMDB_DF["title"].str.lower().str.contains(q, na=False)
+    titles = (
+        TMDB_DF.loc[mask, "title"]
+        .dropna()
+        .drop_duplicates()
+        .head(limit)
+        .tolist()
+    )
+    return titles
 
-    mask = df["title"].str.lower().str.contains(q, na=False)
-    suggestions = df.loc[mask, "title"].dropna().drop_duplicates().head(limit)
 
-    return suggestions.to_list()
+@app.get("/recommend", response_model=List[MovieOut])
+def recommend(
+    title: str = Query(..., min_length=1),
+    mode: str = Query("tfidf", regex="^(tfidf|bert|cf|hybrid)$"),
+    k: int = Query(K_DEFAULT, ge=1, le=50),
+):
+    title = title.strip()
+    if not title:
+        raise HTTPException(status_code=400, detail="Empty title")
+
+    # --- TF-IDF ---
+    if mode == "tfidf":
+        try:
+            idxs, sims = recommend_tfidf(CONTENT_MODELS, title, k=k)
+        except ValueError as e:
+            # titre introuvable → 404 cohérent
+            raise HTTPException(status_code=404, detail=str(e))
+        movies = [movie_to_out(i) for i in idxs]
+        for m, s in zip(movies, sims):
+            m.score_tfidf = float(s)
+        return movies
+
+    # --- BERT ---
+    if mode == "bert":
+        try:
+            idxs, sims = recommend_bert(CONTENT_MODELS, title, k=k)
+        except ValueError as e:
+            raise HTTPException(status_code=404, detail=str(e))
+        movies = [movie_to_out(i) for i in idxs]
+        for m, s in zip(movies, sims):
+            m.score_bert = float(s)
+        return movies
+
+    # --- CF ---
+    if mode == "cf":
+        idxs = recommend_similar_items_cf(CF_MODELS, TMDB_DF, title, k=k)
+        # si pas de mapping MovieLens → liste vide, pas d'erreur
+        if not idxs:
+            return []
+        movies = [movie_to_out(i) for i in idxs]
+        for m in movies:
+            m.score_cf = 1.0
+        return movies
+
+    # --- HYBRID (TF-IDF + BERT) ---
+    if mode == "hybrid":
+        # Si TF-IDF ou BERT plantent pour ce titre, on laisse remonter en 404.
+        try:
+            idxs_tfidf, sims_tfidf = recommend_tfidf(CONTENT_MODELS, title, k=k)
+        except ValueError as e:
+            raise HTTPException(status_code=404, detail=f"TF-IDF: {e}")
+
+        try:
+            idxs_bert, sims_bert = recommend_bert(CONTENT_MODELS, title, k=k)
+        except ValueError as e:
+            raise HTTPException(status_code=404, detail=f"BERT: {e}")
+
+        all_indices = sorted(set(idxs_tfidf) | set(idxs_bert))
+        if not all_indices:
+            return []
+
+        tfidf_map = {i: s for i, s in zip(idxs_tfidf, sims_tfidf)}
+        bert_map = {i: s for i, s in zip(idxs_bert, sims_bert)}
+
+        tfidf_s = np.array([tfidf_map.get(i, 0.0) for i in all_indices])
+        bert_s = np.array([bert_map.get(i, 0.0) for i in all_indices])
+
+        hybrid_s = hybrid_scores(tfidf_s, bert_s, alpha=0.5)
+        order = np.argsort(-hybrid_s)
+
+        final_indices = [all_indices[i] for i in order[:k]]
+        final_scores = hybrid_s[order[:k]]
+
+        movies = [movie_to_out(i) for i in final_indices]
+        for m, s in zip(movies, final_scores):
+            m.score_hybrid = float(s)
+        return movies
+
+    # ne devrait pas arriver
+    raise HTTPException(status_code=400, detail="Invalid mode")
+    
+
+@app.get("/explain", response_model=ExplanationOut)
+def explain(
+    source: str = Query(..., min_length=1),
+    candidate: str = Query(..., min_length=1),
+):
+    idx_source = find_movie_index(TMDB_DF, source)
+    idx_cand = find_movie_index(TMDB_DF, candidate)
+    if idx_source is None or idx_cand is None:
+        raise HTTPException(status_code=404, detail="Movie title not found")
+
+    data = explain_pair(CONTENT_MODELS, idx_source, idx_cand)
+    return ExplanationOut(**data)

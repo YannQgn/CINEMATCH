@@ -2,30 +2,95 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <title>CineMatch</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <title>CineMatch v2</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
-    <div class="container">
-
-        <div class="logo-wrapper">
-            <img src="assets/images/logo.png" alt="CineMatch logo" class="logo">
+  <div class="app-container">
+    <header class="hero">
+      <div class="hero-top-row">
+        <div class="hero-left">
+          <img src="assets/images/logo.png" alt="CineMatch logo" class="logo">
+          <p class="subtitle">
+            Smart movie recommendations with TF-IDF, BERT & collaborative filtering.
+          </p>
         </div>
-
-        <p class="subtitle">Smart Movie Recommendations</p>
-
-        <div class="search-box">
-            <input id="movie-input" type="text" placeholder="Enter a movie title..." oninput="onTitleInput(event)">
-            <button onclick="getRecommendations()">Recommend</button>
+        <div class="hero-right">
+          <button id="account-btn" class="account-bubble" aria-haspopup="true">
+            <span class="account-avatar"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd"
+                  d="M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7ZM14 7C14 8.10457 13.1046 9 12 9C10.8954 9 10 8.10457 10 7C10 5.89543 10.8954 5 12 5C13.1046 5 14 5.89543 14 7Z"
+                  fill="currentColor" />
+                <path
+                  d="M16 15C16 14.4477 15.5523 14 15 14H9C8.44772 14 8 14.4477 8 15V21H6V15C6 13.3431 7.34315 12 9 12H15C16.6569 12 18 13.3431 18 15V21H16V15Z"
+                  fill="currentColor" />
+              </svg></span>
+          </button>
+          <div id="account-menu" class="account-menu">
+            <div class="account-menu-card">
+              <p class="account-title">My space</p>
+              <button class="menu-item" data-action="login">Log-in</button>
+              <button class="menu-item" data-action="signup">Sign-up</button>
+              <a class="menu-item" href="account.html">See my account</a>
+            </div>
+          </div>
         </div>
-        <div id="suggestions"></div>
-        <div id="results"></div>
+      </div>
+    </header>
 
+    <section class="search-section">
+      <div class="search-box">
+        <input type="text" id="movie-input" placeholder="Type a movie title..." autocomplete="off" />
+        <button id="search-btn">Recommend</button>
+      </div>
+
+      <div class="mode-toggle">
+        <label>
+          <input type="radio" name="mode" value="tfidf" checked />
+          <span>TF-IDF</span>
+        </label>
+        <label>
+          <input type="radio" name="mode" value="bert" />
+          <span>BERT</span>
+        </label>
+        <label>
+          <input type="radio" name="mode" value="cf" />
+          <span>CF</span>
+        </label>
+        <label>
+          <input type="radio" name="mode" value="hybrid" />
+          <span>Hybrid</span>
+        </label>
+      </div>
+
+      <ul id="suggestions" class="suggestions"></ul>
+    </section>
+
+    <main>
+      <section id="results" class="results"></section>
+      <section id="explanation" class="explanation"></section>
+    </main>
+  </div>
+
+  <!-- Modale Auth (login / signup uniquement) -->
+  <div id="auth-modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card">
+      <button class="modal-close" id="auth-modal-close">×</button>
+      <h2 id="auth-modal-title">My account</h2>
+      <p id="auth-modal-subtitle" class="modal-subtitle">
+        Cette interface est une maquette (pas de backend utilisateur pour l’instant).
+      </p>
+      <div id="auth-modal-body">
+       
+      </div>
     </div>
+  </div>
 
-    <script src="app.js"></script>
+  <script src="app.js"></script>
 </body>
 
 </html>
