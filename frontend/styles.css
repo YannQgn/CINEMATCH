@@ -1,0 +1,130 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+
+* {
+    font-family: "Roboto", sans-serif;
+}
+
+body {
+    background-color: #0d0d0d;
+    color: #ffffff;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 750px;
+    margin: 50px auto;
+    padding: 20px;
+}
+
+h1 {
+    font-size: 38px;
+    margin-bottom: 5px;
+    text-align: center;
+}
+
+.subtitle {
+    text-align: center;
+    color: #bbbbbb;
+    margin-bottom: 40px;
+}
+
+.search-box {
+    display: flex;
+    gap: 10px;
+}
+
+input {
+    flex: 1;
+    padding: 12px;
+    border-radius: 6px;
+    border: none;
+    font-size: 16px;
+}
+
+button {
+    background-color: #ffa585;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+    font-size: 17px;
+}
+
+button:hover {
+    background-color: #df7d5a;
+}
+
+.logo-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.logo {
+    height: 250px;
+}
+
+.result-item {
+    background: #1a1a1a;
+    padding: 15px;
+    margin-top: 15px;
+    border-radius: 8px;
+    display: flex;
+    gap: 15px;
+}
+
+.poster {
+    width: 90px;
+    border-radius: 6px;
+    flex-shrink: 0;
+    object-fit: cover;
+    background: #000;
+}
+
+.result-content {
+    flex: 1;
+}
+
+.explanation {
+    margin-top: 10px;
+    font-size: 14px;
+    background: #111;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.explanation ul {
+    padding-left: 18px;
+}
+
+.explanation li {
+    margin-bottom: 4px;
+}
+
+
+.explain-btn {
+    margin-top: 10px;
+    background-color: #333;
+    color: #fff;
+}
+
+#suggestions {
+    background: #1a1a1a;
+    border-radius: 6px;
+    margin-top: 5px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.suggestion-item {
+    padding: 8px 10px;
+    cursor: pointer;
+}
+
+.suggestion-item:hover {
+    background: #333;
+}

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>CineMatch</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+
+        <div class="logo-wrapper">
+            <img src="assets/images/logo.png" alt="CineMatch logo" class="logo">
+        </div>
+
+        <p class="subtitle">Smart Movie Recommendations</p>
+
+        <div class="search-box">
+            <input id="movie-input" type="text" placeholder="Enter a movie title..." oninput="onTitleInput(event)">
+            <button onclick="getRecommendations()">Recommend</button>
+        </div>
+        <div id="suggestions"></div>
+        <div id="results"></div>
+
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
