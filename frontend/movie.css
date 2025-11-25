@@ -1,0 +1,203 @@
+/* ===== Layout global fiche film ===== */
+
+.movie-page .hero {
+  margin-bottom: 20px;
+}
+
+.movie-main {
+  margin-top: 8px;
+}
+
+/* layout 2 colonnes : poster + infos */
+
+.movie-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr);
+  gap: 24px;
+  align-items: flex-start;
+  margin-top: 24px;
+}
+
+.movie-left {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 320px;
+}
+
+.movie-right {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ===== Poster ===== */
+
+.movie-poster-large {
+  border-radius: 18px;
+  overflow: hidden;
+  background: radial-gradient(circle at 0 0, rgba(255,255,255,0.08), rgba(11,13,24,0.9));
+  border: 1px solid var(--border-subtle);
+  min-height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.movie-poster-large img {
+  width: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.placeholder-poster.large {
+  width: 100%;
+  padding: 40px 12px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+/* ===== Actions (watchlist / noter / vu) ===== */
+
+.movie-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.watchlist-btn-large {
+  padding-inline: 10px;
+}
+
+/* on réutilise .icon-btn / .seen-toggle / .rating-bubbles définis dans styles.css */
+
+/* ===== Infos film ===== */
+
+.movie-meta-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.movie-meta-line {
+  margin: 0;
+}
+
+.movie-tagline {
+  margin: 6px 0 4px;
+  font-size: 0.95rem;
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+.movie-overview-full {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* ===== Section films similaires ===== */
+
+.movie-similar-section {
+  margin-top: 32px;
+}
+
+.section-header h2 {
+  margin: 0 0 4px;
+  font-size: 1.2rem;
+}
+
+.section-subtitle {
+  margin: 0 0 10px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* grille similaire (injection JS via .similar-grid) */
+
+.similar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.similar-card {
+  background: rgba(11, 13, 24, 0.98);
+  border-radius: 16px;
+  border: 1px solid var(--border-subtle);
+  padding: 10px;
+  display: flex;
+  gap: 8px;
+}
+
+.similar-poster img {
+  width: 70px;
+  border-radius: 8px;
+  display: block;
+}
+
+.placeholder-poster.small {
+  width: 70px;
+  height: 100px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.similar-info h4 {
+  margin: 0 0 2px;
+  font-size: 0.9rem;
+}
+
+.similar-meta {
+  margin: 0 0 4px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.similar-overview {
+  margin: 0 0 6px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* petit bouton "Voir la fiche" */
+
+.btn-link {
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+/* ===== Responsive ===== */
+
+@media (max-width: 768px) {
+  .movie-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .movie-left {
+    max-width: 100%;
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .movie-poster-large {
+    max-width: 180px;
+  }
+
+  .movie-actions {
+    flex-direction: column;
+  }
+}

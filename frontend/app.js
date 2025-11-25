@@ -128,24 +128,22 @@ function renderResults(sourceTitle, movies, mode) {
 
     card.innerHTML = `
       <div class="movie-poster">
-        ${
-          posterUrl
-            ? `<img src="${posterUrl}" alt="${m.title}" />`
-            : `<div class="placeholder-poster">No poster</div>`
-        }
+        ${posterUrl
+        ? `<img src="${posterUrl}" alt="${m.title}" />`
+        : `<div class="placeholder-poster">No poster</div>`
+      }
       </div>
       <div class="movie-info">
         <div class="movie-header-row">
           <div>
             <h3>
-              <button type="button" class="movie-title-btn">${m.title}</button>
+              <button type="button" class="movie-title-btn" data-title="${m.title}">${m.title}</button>
             </h3>
             <p class="movie-meta">
-              ${
-                m.genres
-                  ? `<span class="badge">${m.genres}</span>`
-                  : `<span class="badge badge-muted">No genres</span>`
-              }
+              ${m.genres
+        ? `<span class="badge">${m.genres}</span>`
+        : `<span class="badge badge-muted">No genres</span>`
+      }
             </p>
           </div>
           <div class="card-actions">
@@ -180,9 +178,8 @@ function renderResults(sourceTitle, movies, mode) {
           </div>
         </div>
 
-        <p class="movie-overview">${
-          m.overview || "No overview available."
-        }</p>
+        <p class="movie-overview">${m.overview || "No overview available."
+      }</p>
         <div class="scores">
           ${formatScores(m)}
         </div>
@@ -207,6 +204,16 @@ function renderResults(sourceTitle, movies, mode) {
     if (detailsBtn) detailsBtn.addEventListener("click", open);
 
     setupCardActions(card);
+    // Navigation vers la page film
+    // redirection vers movie.html
+    const links = card.querySelectorAll(".movie-link");
+    links.forEach((lnk) => {
+      lnk.addEventListener("click", () => {
+        window.location.href = `movie.html?title=${encodeURIComponent(lnk.dataset.title)}`;
+      });
+    });
+
+
     resultsEl.appendChild(card);
   });
 }
@@ -258,36 +265,33 @@ function renderExplanation(exp) {
       <h2>Why <span>${exp.candidate_title}</span> is recommended for <span>${exp.source_title}</span></h2>
       <p class="sim-metrics">
         <span>TF-IDF similarity: ${(exp.similarity_tfidf * 100).toFixed(
-          1
-        )}%</span>
+    1
+  )}%</span>
         <span>BERT similarity: ${(exp.similarity_bert * 100).toFixed(1)}%</span>
       </p>
       <ul class="exp-list">
         <li>
           <strong>Shared genres:</strong>
-          ${
-            exp.shared_genres && exp.shared_genres.length
-              ? exp.shared_genres.join(", ")
-              : "None"
-          }
+          ${exp.shared_genres && exp.shared_genres.length
+      ? exp.shared_genres.join(", ")
+      : "None"
+    }
         </li>
         <li>
           <strong>Shared cast (top):</strong>
-          ${
-            exp.shared_cast && exp.shared_cast.length
-              ? exp.shared_cast.join(", ")
-              : "None"
-          }
+          ${exp.shared_cast && exp.shared_cast.length
+      ? exp.shared_cast.join(", ")
+      : "None"
+    }
         </li>
         <li>
           <strong>Director:</strong>
-          ${
-            exp.same_director
-              ? `Same director: ${exp.director || "Unknown"}`
-              : exp.director
-              ? `Different directors (source: ${exp.director})`
-              : "Unknown"
-          }
+          ${exp.same_director
+      ? `Same director: ${exp.director || "Unknown"}`
+      : exp.director
+        ? `Different directors (source: ${exp.director})`
+        : "Unknown"
+    }
         </li>
       </ul>
     </div>
@@ -353,8 +357,10 @@ function openMoviePage(movie, sourceTitle) {
   } catch (e) {
     console.warn("Unable to save movie in sessionStorage", e);
   }
-  window.location.href = "movie.html";
+  // redirection avec titre dans l'URL
+  window.location.href = `movie.html?title=${encodeURIComponent(movie.title)}`;
 }
+
 
 // ---------- ACCOUNT BUBBLE / MODALE AUTH ----------
 

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>CineMatch – Fiche film</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="movie.css" />
+</head>
+
+<body>
+    <div class="app-container movie-page">
+        <header class="hero movie-hero">
+            <div class="hero-top-row">
+                <div class="hero-left">
+                    <a href="index.html" class="back-link">
+                        ← Return to recommandations
+                    </a>
+                    <h1 id="movie-page-title" class="movie-page-title">Film</h1>
+                    <p class="subtitle" id="movie-page-subtitle">
+                        Fiche détaillée du film et recommandations similaires (BERT).
+                    </p>
+                </div>
+                <div class="hero-right">
+                    <div class="account-summary-pill">
+                        <div class="pill-avatar"></div>
+                        <div class="pill-text">
+                            <span class="pill-label">Espace</span>
+                            <span class="pill-name">CineMatch</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="movie-main">
+            <section class="movie-layout">
+                <div class="movie-left">
+                    <div class="movie-poster-large" id="movie-poster-large">
+                        <!-- Poster injecté en JS -->
+                    </div>
+                    <div class="movie-actions">
+                        <button class="icon-btn watchlist-btn-large">
+                            <span class="icon-bookmark"></span> Ajouter à ma watchlist
+                        </button>
+                        <div class="rating-btn-wrapper rating-large">
+                            <button class="icon-btn rating-btn" title="Noter ce film">
+                                <span class="icon-rating"></span> Noter
+                            </button>
+                            <div class="rating-bubbles">
+                                <span data-rating="dislike"><span class="emoji emoji-dislike">👎</span>Pas aimé</span>
+                                <span data-rating="like"><span class="emoji emoji-like">👍</span> J'ai aimé</span>
+                                <span data-rating="love"><span class="emoji emoji-star-eyes">🤩</span> Adoré</span>
+                            </div>
+                        </div>
+                        <button class="icon-btn seen-toggle" data-state="unseen">
+                            <span class="seen-dot"></span>
+                            <span class="seen-label">Pas vu</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="movie-right">
+                    <div class="movie-meta-block">
+                        <p class="movie-meta-line" id="movie-genres"></p>
+                        <p class="movie-meta-line" id="movie-director"></p>
+                        <p class="movie-meta-line" id="movie-cast"></p>
+                    </div>
+                    <p class="movie-tagline" id="movie-tagline"></p>
+                    <p class="movie-overview-full" id="movie-overview"></p>
+                    <section class="movie-similar-section">
+                        <div class="section-header">
+                            <h2>Films similaires</h2>
+                            <p class="section-subtitle">
+                                Basé sur les embeddings BERT de CineMatch.
+                            </p>
+                        </div>
+                        <div id="similar-results" class="results results-grid"></div>
+                    </section>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script src="movie.js"></script>
+</body>
+
+</html>

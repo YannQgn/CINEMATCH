@@ -218,6 +218,16 @@ def recommend(
     # ne devrait pas arriver
     raise HTTPException(status_code=400, detail="Invalid mode")
     
+@app.get("/movie", response_model=MovieOut)
+def get_movie(title: str = Query(..., min_length=1)):
+    """
+    Retourne les infos d'un film unique à partir de son titre exact ou partiel.
+    Utilise la même logique de recherche que pour les recommandations.
+    """
+    idx = find_movie_index(TMDB_DF, title)
+    if idx is None:
+        raise HTTPException(status_code=404, detail="Movie not found")
+    return movie_to_out(idx)
 
 @app.get("/explain", response_model=ExplanationOut)
 def explain(
